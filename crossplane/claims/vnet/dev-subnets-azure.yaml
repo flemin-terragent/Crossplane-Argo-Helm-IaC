@@ -1,0 +1,65 @@
+apiVersion: network.azure.upbound.io/v1beta1
+kind: Subnet
+metadata:
+  name: dev-subnet-default
+  namespace: azure-resources
+  labels:
+    purpose: "infrastructure"
+    environment: "development"
+    subnet-type: "default"
+spec:
+  forProvider:
+    addressPrefixes:
+      - "10.0.1.0/24"
+    resourceGroupName: "dev-resource-group-azure"
+    resourceGroupNameRef:
+      name: dev-resource-group-azure
+    virtualNetworkName: "dev-vnet-azure"
+    virtualNetworkNameRef:
+      name: dev-vnet-azure
+  providerConfigRef:
+    name: default
+---
+apiVersion: network.azure.upbound.io/v1beta1
+kind: Subnet
+metadata:
+  name: dev-subnet-web
+  namespace: azure-resources
+  labels:
+    purpose: "infrastructure"
+    environment: "development"
+    subnet-type: "web"
+spec:
+  forProvider:
+    addressPrefixes:
+      - "10.0.2.0/24"
+    resourceGroupName: "dev-resource-group-azure"
+    resourceGroupNameRef:
+      name: dev-resource-group-azure
+    virtualNetworkName: "dev-vnet-azure"
+    virtualNetworkNameRef:
+      name: dev-vnet-azure
+  providerConfigRef:
+    name: default
+---
+apiVersion: network.azure.upbound.io/v1beta1
+kind: Subnet
+metadata:
+  name: dev-subnet-app
+  namespace: azure-resources
+  labels:
+    purpose: "infrastructure"
+    environment: "development"
+    subnet-type: "app"
+spec:
+  forProvider:
+    addressPrefixes:
+      - "10.0.3.0/24"
+    resourceGroupName: "dev-resource-group-azure"
+    resourceGroupNameRef:
+      name: dev-resource-group-azure
+    virtualNetworkName: "dev-vnet-azure"
+    virtualNetworkNameRef:
+      name: dev-vnet-azure
+  providerConfigRef:
+    name: default

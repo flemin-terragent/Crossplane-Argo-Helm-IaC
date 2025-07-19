@@ -1,0 +1,38 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: azure-resource-group-native
+  namespace: argocd
+  labels:
+    project: azure-infra-dev
+    component: resource-group
+    deployment-order: "1"
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  project: azure-infra-dev
+  source:
+    repoURL: https://github.com/FL40056213_wipro/Crossplane-Argo-Helm.git
+    targetRevision: HEAD
+    path: crossplane/claims/resource-group
+    directory:
+      include: "*-azure.yaml"
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: azure-resources
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+    - CreateNamespace=true
+    - RespectIgnoreDifferences=true
+  info:
+  - name: "Description"
+    value: "Deploy Azure Resource Group using native Azure provider"
+  - name: "Deployment Order"
+    value: "1 - Deploy First"
+  - name: "Dependencies"
+    value: "None - Base infrastructure"
+  - name: "Provider"
+    value: "azure.upbound.io (Native Azure Provider)"

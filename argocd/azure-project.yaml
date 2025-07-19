@@ -1,0 +1,77 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: azure-project
+  namespace: argocd
+spec:
+  description: Project for Azure infrastructure and applications
+  sourceRepos:
+    - 'https://github.com/your-org/crossplane-argo-helm'  # Replace with your repository URL
+    - 'https://charts.crossplane.io/stable'
+    - 'https://argoproj.github.io/argo-helm'
+  destinations:
+    - namespace: crossplane-system
+      server: https://kubernetes.default.svc
+    - namespace: azure-resources
+      server: https://kubernetes.default.svc
+    - namespace: argocd
+      server: https://kubernetes.default.svc
+  clusterResourceWhitelist:
+    - group: ''
+      kind: Namespace
+    - group: 'apiextensions.k8s.io'
+      kind: CustomResourceDefinition
+    - group: 'rbac.authorization.k8s.io'
+      kind: ClusterRole
+    - group: 'rbac.authorization.k8s.io'
+      kind: ClusterRoleBinding
+    - group: 'admissionregistration.k8s.io'
+      kind: MutatingWebhookConfiguration
+    - group: 'admissionregistration.k8s.io'
+      kind: ValidatingWebhookConfiguration
+  namespaceResourceWhitelist:
+    - group: ''
+      kind: Service
+    - group: ''
+      kind: ServiceAccount
+    - group: ''
+      kind: Secret
+    - group: ''
+      kind: ConfigMap
+    - group: 'apps'
+      kind: Deployment
+    - group: 'apps'
+      kind: StatefulSet
+    - group: 'apps'
+      kind: DaemonSet
+    - group: 'batch'
+      kind: Job
+    - group: 'batch'
+      kind: CronJob
+    - group: 'networking.k8s.io'
+      kind: Ingress
+    - group: 'policy'
+      kind: PodDisruptionBudget
+    - group: 'azure.crossplane.io'
+      kind: '*'
+    - group: 'custom.crossplane.io'
+      kind: '*'
+    - group: 'pkg.crossplane.io'
+      kind: '*'
+    - group: 'apiextensions.crossplane.io'
+      kind: '*'
+  roles:
+    - name: admin
+      description: Full access to the project
+      policies:
+        - p, proj:azure-project:admin, applications, *, azure-project/*, allow
+        - p, proj:azure-project:admin, repositories, *, *, allow
+      groups:
+        - admins
+    - name: developer
+      description: Developer access to the project
+      policies:
+        - p, proj:azure-project:developer, applications, get, azure-project/*, allow
+        - p, proj:azure-project:developer, applications, sync, azure-project/*, allow
+      groups:
+        - developers

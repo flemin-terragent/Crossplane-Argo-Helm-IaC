@@ -1,0 +1,20 @@
+apiVersion: azure.upbound.io/v1beta1
+kind: ResourceGroup
+metadata:
+  name: dev-resource-group-azure
+  namespace: azure-resources
+  labels:
+    purpose: "infrastructure"
+    environment: "development"
+    deployment-order: "1"
+spec:
+  forProvider:
+    location: "East US"
+    tags:
+      environment: "development"
+      project: "azure-infra-dev"
+      managed-by: "crossplane"
+      purpose: "infrastructure"
+      deployment-order: "1"
+  providerConfigRef:
+    name: default

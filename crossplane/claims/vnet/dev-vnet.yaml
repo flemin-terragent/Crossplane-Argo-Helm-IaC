@@ -1,0 +1,27 @@
+apiVersion: custom.crossplane.io/v1alpha1
+kind: AzureVNet
+metadata:
+  name: dev-vnet
+  namespace: azure-resources
+  labels:
+    purpose: "infrastructure"
+    environment: "development"
+spec:
+  resourceGroupName: "rg-azure-infra-dev"
+  vnetName: "vnet-azure-infra-dev"
+  location: "East US"
+  addressSpace: 
+  - "10.0.0.0/16"
+  subnets:
+  - name: "default"
+    addressPrefix: "10.0.1.0/24"
+  - name: "web"
+    addressPrefix: "10.0.2.0/24"
+  - name: "app"
+    addressPrefix: "10.0.3.0/24"
+  tags:
+    environment: "development"
+    project: "azure-infra-dev"
+    managed-by: "crossplane"
+    purpose: "networking"
+    deployment-order: "2"

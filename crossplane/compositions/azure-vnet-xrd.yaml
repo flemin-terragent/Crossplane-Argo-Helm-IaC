@@ -1,0 +1,82 @@
+apiVersion: apiextensions.crossplane.io/v1
+kind: CompositeResourceDefinition
+metadata:
+  name: xazurevnets.custom.crossplane.io
+spec:
+  group: custom.crossplane.io
+  names:
+    kind: XAzureVNet
+    plural: xazurevnets
+  versions:
+  - name: v1alpha1
+    served: true
+    referenceable: true
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          spec:
+            type: object
+            properties:
+              location:
+                type: string
+                description: Azure region for the virtual network
+                default: "East US"
+              resourceGroupName:
+                type: string
+                description: Name of the resource group containing the VNet
+              vnetName:
+                type: string
+                description: Name of the virtual network
+              addressSpace:
+                type: array
+                description: Address space for the virtual network
+                items:
+                  type: string
+                default: ["10.0.0.0/16"]
+              subnets:
+                type: array
+                description: Subnets to create in the virtual network
+                items:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                    addressPrefix:
+                      type: string
+                  required:
+                  - name
+                  - addressPrefix
+                default:
+                - name: "default"
+                  addressPrefix: "10.0.1.0/24"
+              tags:
+                type: object
+                description: Tags to apply to the virtual network
+                additionalProperties:
+                  type: string
+            required:
+            - resourceGroupName
+            - vnetName
+          status:
+            type: object
+            properties:
+              vnetId:
+                type: string
+                description: ID of the created virtual network
+              vnetLocation:
+                type: string
+                description: Location of the created virtual network
+              subnets:
+                type: array
+                description: Created subnets
+                items:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                    id:
+                      type: string
+  claimNames:
+    kind: AzureVNet
+    plural: azurevnets

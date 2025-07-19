@@ -1,0 +1,103 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: terraform-azure-rg
+  namespace: terraform
+spec:
+  template:
+    spec:
+      serviceAccountName: terraform-runner
+      containers:
+      - name: terraform
+        image: hashicorp/terraform:1.6
+        command: ["/bin/sh"]
+        args:
+        - -c
+        - |
+          set -e
+          echo "Starting Terraform deployment..."
+          
+          # Copy Terraform files from ConfigMap
+          mkdir -p /terraform
+          cp /config/* /terraform/
+          cd /terraform
+          
+          # Initialize Terraform
+          terraform init
+          
+          # Plan the deployment
+          terraform plan -var-file=/dev/null
+          
+          # Apply the deployment
+          terraform apply -auto-approve
+          
+          # Show outputs
+          terraform output
+          
+          echo "Terraform deployment completed successfully!"
+        env:
+        - name: ARM_SUBSCRIPTION_ID
+          valueFrom:
+            secretKeyRef:
+              name: azure-secret
+              key: subscriptionId
+        - name: ARM_CLIENT_ID
+          valueFrom:
+            secretKeyRef:
+              name: azure-secret
+              key: clientId
+        - name: ARM_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: azure-secret
+              key: clientSecret
+        - name: ARM_TENANT_ID
+          valueFrom:
+            secretKeyRef:
+              name: azure-secret
+              key: tenantId
+        - name: TF_VAR_subscription_id
+          valueFrom:
+            secretKeyRef:
+              name: azure-secret
+              key: subscriptionId
+        - name: TF_VAR_client_id
+          valueFrom:
+            secretKeyRef:
+              name: azure-secret
+              key: clientId
+        - name: TF_VAR_client_secret
+          valueFrom:
+            secretKeyRef:
+              name: azure-secret
+              key: clientSecret
+        - name: TF_VAR_tenant_id
+          valueFrom:
+            secretKeyRef:
+              name: azure-secret
+              key: tenantId
+        - name: TF_VAR_resource_group_name
+          value: "rg-terraform-demo"
+        - name: TF_VAR_location
+          value: "East US"
+        - name: TF_VAR_environment
+          value: "development"
+        - name: TF_VAR_owner
+          value: "crossplane-argo-demo"
+        volumeMounts:
+        - name: terraform-config
+          mountPath: /config
+          readOnly: true
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "200m"
+      volumes:
+      - name: terraform-config
+        configMap:
+          name: terraform-azure-rg-config
+      restartPolicy: OnFailure
+  backoffLimit: 3

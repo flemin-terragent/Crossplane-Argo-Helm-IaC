@@ -1,0 +1,46 @@
+apiVersion: apiextensions.crossplane.io/v1
+kind: CompositeResourceDefinition
+metadata:
+  name: xazureinfrastructures.custom.crossplane.io
+spec:
+  group: custom.crossplane.io
+  names:
+    kind: XAzureInfrastructure
+    plural: xazureinfrastructures
+  versions:
+  - name: v1alpha1
+    served: true
+    referenceable: true
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          spec:
+            type: object
+            properties:
+              location:
+                type: string
+                description: Azure region for the resource group
+                default: "East US"
+              resourceGroupName:
+                type: string
+                description: Name of the resource group
+              tags:
+                type: object
+                description: Tags to apply to the resource group
+                additionalProperties:
+                  type: string
+            required:
+            - resourceGroupName
+          status:
+            type: object
+            properties:
+              resourceGroupId:
+                type: string
+                description: ID of the created resource group
+              resourceGroupLocation:
+                type: string
+                description: Location of the created resource group
+  claimNames:
+    kind: AzureInfrastructure
+    plural: azureinfrastructures

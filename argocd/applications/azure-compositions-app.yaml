@@ -1,0 +1,34 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: azure-compositions
+  namespace: argocd
+  labels:
+    project: azure-infra-dev
+    component: compositions
+    deployment-order: "0"
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+spec:
+  project: azure-infra-dev
+  source:
+    repoURL: https://github.com/FL40056213_wipro/Crossplane-Argo-Helm.git
+    targetRevision: HEAD
+    path: crossplane/compositions
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: crossplane-system
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+    - CreateNamespace=true
+    - RespectIgnoreDifferences=true
+  info:
+  - name: "Description"
+    value: "Deploy Crossplane Compositions and XRDs"
+  - name: "Deployment Order"
+    value: "0 - Deploy First (Foundation)"
+  - name: "Dependencies"
+    value: "Crossplane must be installed"

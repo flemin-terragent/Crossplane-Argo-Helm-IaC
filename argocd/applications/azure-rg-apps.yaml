@@ -1,0 +1,55 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: crossplane-azure-rg
+  namespace: argocd
+  labels:
+    deployment-method: crossplane
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/FL40056213_wipro/Crossplane-Argo-Helm.git
+    targetRevision: HEAD
+    path: crossplane/claims
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: azure-resources
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+    - CreateNamespace=true
+  info:
+  - name: "Description"
+    value: "Deploy Azure Resource Group using Crossplane"
+  - name: "Method"
+    value: "Crossplane XRD/Composition"
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: terraform-azure-rg
+  namespace: argocd
+  labels:
+    deployment-method: terraform
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/FL40056213_wipro/Crossplane-Argo-Helm.git
+    targetRevision: HEAD
+    path: terraform/k8s-manifests
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: terraform
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+    - CreateNamespace=true
+  info:
+  - name: "Description"
+    value: "Deploy Azure Resource Group using Terraform"
+  - name: "Method"
+    value: "Terraform Job in Kubernetes"

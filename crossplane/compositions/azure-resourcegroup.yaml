@@ -1,0 +1,80 @@
+apiVersion: apiextensions.crossplane.io/v1
+kind: CompositeResourceDefinition
+metadata:
+  name: xresourcegroups.azure.platform.upbound.io
+spec:
+  group: azure.platform.upbound.io
+  names:
+    kind: XResourceGroup
+    plural: xresourcegroups
+  claimNames:
+    kind: ResourceGroup
+    plural: resourcegroups
+  versions:
+  - name: v1alpha1
+    served: true
+    referenceable: true
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          spec:
+            type: object
+            properties:
+              parameters:
+                type: object
+                properties:
+                  location:
+                    type: string
+                    description: Azure location for the resource group
+                    default: "East US"
+                  resourceGroupName:
+                    type: string
+                    description: Name of the resource group
+                required:
+                - location
+                - resourceGroupName
+            required:
+            - parameters
+          status:
+            type: object
+            properties:
+              resourceGroupName:
+                type: string
+                description: The name of the created resource group
+---
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  name: azure-resourcegroup
+  labels:
+    provider: azure
+    service: resourcemanager
+spec:
+  writeConnectionSecretsToNamespace: crossplane-system
+  compositeTypeRef:
+    apiVersion: azure.platform.upbound.io/v1alpha1
+    kind: XResourceGroup
+  resources:
+  - name: resourcegroup
+    base:
+      apiVersion: azure.upbound.io/v1beta1
+      kind: ResourceGroup
+      spec:
+        forProvider:
+          location: "East US"
+        providerConfigRef:
+          name: default
+    patches:
+    - type: FromCompositeFieldPath
+      fromFieldPath: spec.parameters.location
+      toFieldPath: spec.forProvider.location
+    - type: FromCompositeFieldPath
+      fromFieldPath: spec.parameters.resourceGroupName
+      toFieldPath: metadata.name
+    - type: FromCompositeFieldPath
+      fromFieldPath: spec.parameters.resourceGroupName
+      toFieldPath: spec.forProvider.name
+    - type: ToCompositeFieldPath
+      fromFieldPath: spec.forProvider.name
+      toFieldPath: status.resourceGroupName

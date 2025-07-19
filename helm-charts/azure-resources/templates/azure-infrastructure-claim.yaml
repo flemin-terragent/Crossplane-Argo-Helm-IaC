@@ -1,0 +1,12 @@
+apiVersion: custom.crossplane.io/v1alpha1
+kind: AzureInfrastructure
+metadata:
+  name: {{ include "azure-resources.fullname" . }}
+  namespace: {{ .Values.crossplane.namespace }}
+  labels:
+    {{- include "azure-resources.labels" . | nindent 4 }}
+spec:
+  location: {{ .Values.azure.location | quote }}
+  resourceGroupName: {{ .Values.azure.resourceGroup.name | quote }}
+  tags:
+    {{- toYaml .Values.tags | nindent 4 }}

@@ -1,0 +1,30 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: crossplane-azure-infrastructure
+  namespace: argocd
+  labels:
+    app: crossplane-azure-infrastructure
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/your-org/crossplane-argo-helm  # Replace with your repository URL
+    targetRevision: HEAD
+    path: crossplane
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: crossplane-system
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - PruneLast=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
+  revisionHistoryLimit: 3

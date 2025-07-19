@@ -1,0 +1,69 @@
+# Default values for azure-resources.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# Azure Infrastructure Configuration
+azure:
+  # Azure region where resources will be deployed
+  location: "East US"
+  
+  # Resource group configuration
+  resourceGroup:
+    name: "my-app-rg"
+
+# Resource naming
+nameOverride: ""
+fullnameOverride: ""
+
+# Tags to apply to all resources
+tags:
+  environment: "development"
+  project: "crossplane-demo"
+  managed-by: "crossplane"
+  purpose: "resource-group-only"
+
+# Crossplane configuration
+crossplane:
+  # Provider configuration reference
+  providerConfigRef: "default"
+  
+  # Namespace for claims
+  namespace: "azure-resources"
+
+# Application configuration (if deploying an app alongside infrastructure)
+app:
+  enabled: false
+  name: "my-app"
+  image:
+    repository: "nginx"
+    tag: "latest"
+    pullPolicy: "IfNotPresent"
+  
+  service:
+    type: "ClusterIP"
+    port: 80
+    
+  ingress:
+    enabled: false
+    className: ""
+    annotations: {}
+    hosts:
+      - host: chart-example.local
+        paths:
+          - path: /
+            pathType: Prefix
+    tls: []
+
+# Resource limits and requests
+resources:
+  limits:
+    cpu: "100m"
+    memory: "128Mi"
+  requests:
+    cpu: "50m"
+    memory: "64Mi"
+
+# Node selector, tolerations, and affinity
+nodeSelector: {}
+tolerations: []
+affinity: {}

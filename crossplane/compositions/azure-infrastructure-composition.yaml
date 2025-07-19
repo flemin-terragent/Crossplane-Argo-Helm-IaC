@@ -1,0 +1,37 @@
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  name: azure-infrastructure-composition
+  labels:
+    crossplane.io/xrd: xazureinfrastructures.custom.crossplane.io
+spec:
+  compositeTypeRef:
+    apiVersion: custom.crossplane.io/v1alpha1
+    kind: XAzureInfrastructure
+  
+  resources:
+  - name: resource-group
+    base:
+      apiVersion: azure.crossplane.io/v1alpha3
+      kind: ResourceGroup
+      spec:
+        forProvider:
+          location: East US
+        providerConfigRef:
+          name: default
+    patches:
+    - type: FromCompositeFieldPath
+      fromFieldPath: spec.location
+      toFieldPath: spec.forProvider.location
+    - type: FromCompositeFieldPath
+      fromFieldPath: spec.resourceGroupName
+      toFieldPath: metadata.name
+    - type: FromCompositeFieldPath
+      fromFieldPath: spec.tags
+      toFieldPath: spec.forProvider.tags
+    - type: ToCompositeFieldPath
+      fromFieldPath: status.atProvider.id
+      toFieldPath: status.resourceGroupId
+    - type: ToCompositeFieldPath
+      fromFieldPath: spec.forProvider.location
+      toFieldPath: status.resourceGroupLocation

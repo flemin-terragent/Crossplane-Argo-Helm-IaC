@@ -1,0 +1,13 @@
+apiVersion: custom.crossplane.io/v1alpha1
+kind: AzureInfrastructure
+metadata:
+  name: my-azure-infrastructure
+  namespace: azure-resources
+spec:
+  location: "East US"
+  resourceGroupName: "my-app-rg"
+  tags:
+    environment: "development"
+    project: "crossplane-demo"
+    managed-by: "crossplane"
+    purpose: "resource-group-only"

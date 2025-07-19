@@ -1,0 +1,55 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: local-guestbook
+  namespace: argocd
+  labels:
+    repo-type: local
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/FL40056213_wipro/Crossplane-Argo-Helm.git
+    targetRevision: HEAD
+    path: guestbook
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: default
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+    - CreateNamespace=true
+  info:
+  - name: "Description"
+    value: "Local Guestbook Application"
+  - name: "Repository"
+    value: "Local Git Server"
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: local-helm-guestbook
+  namespace: argocd
+  labels:
+    repo-type: local
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/FL40056213_wipro/Crossplane-Argo-Helm.git
+    targetRevision: HEAD
+    path: helm-guestbook
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: default
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+    - CreateNamespace=true
+  info:
+  - name: "Description"
+    value: "Local Helm Guestbook Application"
+  - name: "Repository"
+    value: "Local Git Server"

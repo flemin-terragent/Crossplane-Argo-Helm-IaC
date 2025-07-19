@@ -1,0 +1,125 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: crossplane-infrastructure
+  namespace: argocd
+spec:
+  project: default
+  source:
+    # Using the ArgoCD example apps repository for demonstration
+    # In real setup, this would be your Git repository
+    repoURL: https://github.com/argoproj/argocd-example-apps.git
+    targetRevision: HEAD
+    path: helm-guestbook
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: default
+  syncPolicy:
+    # Manual sync only - we'll manage Crossplane resources directly
+    syncOptions:
+    - CreateNamespace=true
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: local-development-guide
+  namespace: argocd
+data:
+  README.md: |
+    # Local Development Setup for Crossplane + ArgoCD
+    
+    ## Current Configuration
+    
+    This setup uses a **hybrid approach** for local development:
+    
+    ### Direct Resource Management (Current)
+    - Crossplane compositions: Managed via `kubectl` and `make` commands
+    - Azure resources: Created directly through Crossplane
+    - ArgoCD: Used for monitoring and demonstration
+    
+    ### Commands for Resource Management
+    
+    ```bash
+    # Deploy Crossplane compositions
+    make deploy-compositions
+    
+    # Create Azure resources
+    make test-azure
+    
+    # Verify resources
+    kubectl get resourcegroup -n azure-resources
+    kubectl get compositions
+    
+    # Access ArgoCD UI
+    open http://argocd.local
+    # Username: admin
+    # Password: (get via) kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
+    ```
+    
+    ## Setting Up Full GitOps (Optional)
+    
+    To enable full GitOps with your own repository:
+    
+    1. **Create a Git repository:**
+       ```bash
+       # Create repository on GitHub/GitLab
+       git remote add origin https://github.com/YOUR_USERNAME/crossplane-argo-helm.git
+       git push -u origin main
+       ```
+    
+    2. **Update ArgoCD applications:**
+       ```bash
+       # Edit argocd/applications/crossplane-apps.yaml
+       # Change repoURL to your repository URL
+       
+       # Apply applications
+       kubectl apply -f argocd/applications/crossplane-apps.yaml
+       ```
+    
+    ## Benefits of Current Setup
+    
+    ✅ **Immediate functionality** - All resources work without Git setup
+    ✅ **ArgoCD monitoring** - UI available for learning and monitoring  
+    ✅ **Local development** - Fast iteration without Git commits
+    ✅ **Production ready** - Can be extended to full GitOps later
+    
+    ## ArgoCD Access
+    
+    - **URL**: http://argocd.local
+    - **Username**: admin  
+    - **Password**: (see command above)
+    
+    This setup gives you the best of both worlds: immediate functionality 
+    for learning and development, with the option to add full GitOps later.
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: deployment-status
+  namespace: argocd
+data:
+  status.yaml: |
+    deployment_status:
+      step1_environment: "✅ COMPLETED - Environment verified and namespaces created"
+      step2_secrets: "✅ COMPLETED - Azure secrets loaded and configured"
+      step3_crossplane: "✅ COMPLETED - Crossplane installed with Azure provider"
+      step4_argocd: "✅ COMPLETED - ArgoCD installed with ingress access"
+      step5_compositions: "✅ COMPLETED - Crossplane compositions deployed"
+      step6_azure_resources: "✅ COMPLETED - Azure resource creation tested"
+      step7_argocd_apps: "✅ COMPLETED - ArgoCD configured for local development"
+      
+    access_points:
+      argocd_url: "http://argocd.local"
+      argocd_username: "admin"
+      argocd_password_command: "kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath='{.data.password}' | base64 -d"
+      
+    current_resources:
+      azure_resource_group: "crossplane-test-rg (East US)"
+      crossplane_providers: "Azure provider family + network provider"
+      argocd_applications: "Demo app + local development setup"
+      
+    next_steps:
+      - "Access ArgoCD UI at http://argocd.local"
+      - "Create more Azure resources via Crossplane"
+      - "Set up Git repository for full GitOps (optional)"
+      - "Scale infrastructure as needed"

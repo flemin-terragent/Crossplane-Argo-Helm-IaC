@@ -1,0 +1,10 @@
+apiVersion: azure.platform.upbound.io/v1alpha1
+kind: ResourceGroup
+metadata:
+  name: test-rg
+  namespace: azure-resources
+spec:
+  parameters:
+    location: "East US"
+    resourceGroupName: "crossplane-test-rg"
+  compositeDeletePolicy: Foreground

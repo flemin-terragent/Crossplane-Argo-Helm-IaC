@@ -1,0 +1,17 @@
+apiVersion: custom.crossplane.io/v1alpha1
+kind: AzureInfrastructure
+metadata:
+  name: dev-resource-group
+  namespace: azure-resources
+  labels:
+    purpose: "infrastructure"
+    environment: "development"
+spec:
+  resourceGroupName: "rg-azure-infra-dev"
+  location: "East US"
+  tags:
+    environment: "development"
+    project: "azure-infra-dev"
+    managed-by: "crossplane"
+    purpose: "infrastructure"
+    deployment-order: "1"

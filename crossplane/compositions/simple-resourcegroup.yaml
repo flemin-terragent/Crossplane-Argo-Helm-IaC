@@ -1,0 +1,78 @@
+apiVersion: apiextensions.crossplane.io/v1
+kind: CompositeResourceDefinition
+metadata:
+  name: xresourcegroups.azure.crossplane.io
+spec:
+  group: azure.crossplane.io
+  names:
+    kind: XResourceGroup
+    plural: xresourcegroups
+  versions:
+  - name: v1alpha1
+    served: true
+    referenceable: true
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          spec:
+            type: object
+            properties:
+              location:
+                type: string
+                description: Azure region for the resource group
+                default: "East US"
+              name:
+                type: string
+                description: Name of the resource group
+              tags:
+                type: object
+                description: Tags to apply to the resource group
+                additionalProperties:
+                  type: string
+            required:
+            - name
+          status:
+            type: object
+            properties:
+              resourceGroupId:
+                type: string
+                description: ID of the created resource group
+  claimNames:
+    kind: ResourceGroupClaim
+    plural: resourcegroupclaims
+---
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  name: azure-resourcegroup-composition
+  labels:
+    crossplane.io/xrd: xresourcegroups.azure.crossplane.io
+spec:
+  compositeTypeRef:
+    apiVersion: azure.crossplane.io/v1alpha1
+    kind: XResourceGroup
+  
+  resources:
+  - name: resource-group
+    base:
+      apiVersion: azure.crossplane.io/v1alpha3
+      kind: ResourceGroup
+      spec:
+        forProvider:
+          location: East US
+        providerConfigRef:
+          name: default
+    patches:
+    - type: FromCompositeFieldPath
+      fromFieldPath: spec.location
+      toFieldPath: spec.forProvider.location
+    - type: FromCompositeFieldPath
+      fromFieldPath: spec.name
+      toFieldPath: metadata.name
+    - type: FromCompositeFieldPath
+      fromFieldPath: spec.tags
+      toFieldPath: spec.forProvider.tags
+    - type: ToCompositeFieldPath
+      fromFieldPath: status.atProvider.id
+      toFieldPath: status.resourceGroupId

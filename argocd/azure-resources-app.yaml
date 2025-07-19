@@ -1,0 +1,42 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: azure-resources-helm
+  namespace: argocd
+  labels:
+    app: azure-resources-helm
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/your-org/crossplane-argo-helm  # Replace with your repository URL
+    targetRevision: HEAD
+    path: helm-charts/azure-resources
+    helm:
+      valueFiles:
+        - values.yaml
+      parameters:
+        - name: azure.location
+          value: "East US"
+        - name: azure.resourceGroup.name
+          value: "my-app-rg"
+        - name: tags.environment
+          value: "development"
+        - name: tags.purpose
+          value: "resource-group-only"
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: azure-resources
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - PruneLast=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
+  revisionHistoryLimit: 3

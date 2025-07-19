@@ -1,0 +1,38 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: azure-vnet-native
+  namespace: argocd
+  labels:
+    project: azure-infra-dev
+    component: vnet
+    deployment-order: "2"
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+spec:
+  project: azure-infra-dev
+  source:
+    repoURL: https://github.com/FL40056213_wipro/Crossplane-Argo-Helm.git
+    targetRevision: HEAD
+    path: crossplane/claims/vnet
+    directory:
+      include: "*-azure.yaml"
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: azure-resources
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+    - CreateNamespace=true
+    - RespectIgnoreDifferences=true
+  info:
+  - name: "Description"
+    value: "Deploy Azure Virtual Network and Subnets using native Azure provider"
+  - name: "Deployment Order"
+    value: "2 - Deploy After Resource Group"
+  - name: "Dependencies"
+    value: "azure-resource-group-native (must be deployed first)"
+  - name: "Provider"
+    value: "network.azure.upbound.io (Native Azure Provider)"

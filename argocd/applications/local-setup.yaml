@@ -1,0 +1,72 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: demo-app
+  namespace: argocd
+spec:
+  project: default
+  source:
+    # Using ArgoCD example app for demonstration
+    repoURL: https://github.com/argoproj/argocd-example-apps.git
+    targetRevision: HEAD
+    path: guestbook
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: default
+  syncPolicy:
+    # Manual sync only
+    syncOptions:
+    - CreateNamespace=true
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: argocd-setup-instructions
+  namespace: argocd
+  labels:
+    app.kubernetes.io/name: argocd-setup
+data:
+  instructions.md: |
+    # ArgoCD Setup Instructions
+    
+    ## Current Status
+    ✅ ArgoCD is installed and accessible at: http://argocd.local
+    ✅ Admin credentials: admin / GkjgwJarc8kDE86W
+    ✅ Crossplane compositions are deployed
+    ✅ Azure resources are working
+    
+    ## For Full GitOps Setup:
+    
+    1. **Create a GitHub repository:**
+       ```bash
+       # Create a new repository on GitHub
+       # Then push this local repository:
+       git remote add origin https://github.com/YOUR_USERNAME/crossplane-argo-helm.git
+       git branch -M main
+       git push -u origin main
+       ```
+    
+    2. **Update ArgoCD applications:**
+       ```bash
+       # Edit argocd/applications/crossplane-apps.yaml
+       # Change repoURL to your GitHub repository URL
+       # Then apply:
+       kubectl apply -f argocd/applications/crossplane-apps.yaml
+       ```
+    
+    3. **For now, manage resources directly:**
+       ```bash
+       # Deploy compositions
+       make deploy-compositions
+       
+       # Create Azure resources
+       make test-azure
+       
+       # Monitor resources
+       kubectl get resourcegroup -n azure-resources
+       ```
+    
+    ## Access ArgoCD UI:
+    - URL: http://argocd.local
+    - Username: admin
+    - Password: GkjgwJarc8kDE86W

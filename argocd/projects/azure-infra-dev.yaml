@@ -1,0 +1,64 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: azure-infra-dev
+  namespace: argocd
+spec:
+  description: "Azure Infrastructure Development Project"
+  
+  # Source repositories allowed for this project
+  sourceRepos:
+  - 'https://github.com/FL40056213_wipro/Crossplane-Argo-Helm.git'
+  
+  # Destinations allowed for applications in this project
+  destinations:
+  - namespace: 'azure-resources'
+    server: 'https://kubernetes.default.svc'
+  - namespace: 'crossplane-system'
+    server: 'https://kubernetes.default.svc'
+  
+  # Cluster resource allow list
+  clusterResourceWhitelist:
+  - group: 'apiextensions.crossplane.io'
+    kind: '*'
+  - group: 'azure.crossplane.io'
+    kind: '*'
+  - group: 'custom.crossplane.io'
+    kind: '*'
+  - group: 'azure.upbound.io'
+    kind: '*'
+  - group: 'network.azure.upbound.io'
+    kind: '*'
+  
+  # Namespace resource allow list
+  namespaceResourceWhitelist:
+  - group: ''
+    kind: 'ConfigMap'
+  - group: ''
+    kind: 'Secret'
+  - group: 'azure.crossplane.io'
+    kind: '*'
+  - group: 'custom.crossplane.io'
+    kind: '*'
+  - group: 'azure.upbound.io'
+    kind: '*'
+  - group: 'network.azure.upbound.io'
+    kind: '*'
+  
+  # Project roles
+  roles:
+  - name: admin
+    description: "Admin access to Azure infrastructure project"
+    policies:
+    - p, proj:azure-infra-dev:admin, applications, *, azure-infra-dev/*, allow
+    - p, proj:azure-infra-dev:admin, repositories, *, *, allow
+    groups:
+    - azure-infra-admins
+  
+  - name: developer
+    description: "Developer access to Azure infrastructure project"
+    policies:
+    - p, proj:azure-infra-dev:developer, applications, get, azure-infra-dev/*, allow
+    - p, proj:azure-infra-dev:developer, applications, sync, azure-infra-dev/*, allow
+    groups:
+    - azure-infra-developers

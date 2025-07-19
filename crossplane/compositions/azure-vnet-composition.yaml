@@ -1,0 +1,72 @@
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  name: azure-vnet-composition
+  labels:
+    crossplane.io/xrd: xazurevnets.custom.crossplane.io
+spec:
+  compositeTypeRef:
+    apiVersion: custom.crossplane.io/v1alpha1
+    kind: XAzureVNet
+  
+  resources:
+  - name: virtual-network
+    base:
+      apiVersion: network.azure.crossplane.io/v1alpha3
+      kind: VirtualNetwork
+      spec:
+        forProvider:
+          location: East US
+          addressSpace: ["10.0.0.0/16"]
+          resourceGroupNameSelector:
+            matchLabels:
+              purpose: "infrastructure"
+        providerConfigRef:
+          name: default
+    patches:
+    - type: FromCompositeFieldPath
+      fromFieldPath: spec.location
+      toFieldPath: spec.forProvider.location
+    - type: FromCompositeFieldPath
+      fromFieldPath: spec.vnetName
+      toFieldPath: metadata.name
+    - type: FromCompositeFieldPath
+      fromFieldPath: spec.addressSpace
+      toFieldPath: spec.forProvider.addressSpace
+    - type: FromCompositeFieldPath
+      fromFieldPath: spec.resourceGroupName
+      toFieldPath: spec.forProvider.resourceGroupName
+    - type: FromCompositeFieldPath
+      fromFieldPath: spec.tags
+      toFieldPath: spec.forProvider.tags
+    - type: ToCompositeFieldPath
+      fromFieldPath: status.atProvider.id
+      toFieldPath: status.vnetId
+    - type: ToCompositeFieldPath
+      fromFieldPath: spec.forProvider.location
+      toFieldPath: status.vnetLocation
+  
+  - name: default-subnet
+    base:
+      apiVersion: network.azure.crossplane.io/v1alpha3
+      kind: Subnet
+      spec:
+        forProvider:
+          addressPrefix: "10.0.1.0/24"
+          virtualNetworkNameSelector:
+            matchControllerRef: true
+          resourceGroupNameSelector:
+            matchLabels:
+              purpose: "infrastructure"
+        providerConfigRef:
+          name: default
+    patches:
+    - type: FromCompositeFieldPath
+      fromFieldPath: spec.subnets[0].name
+      toFieldPath: metadata.name
+    - type: FromCompositeFieldPath
+      fromFieldPath: spec.subnets[0].addressPrefix
+      toFieldPath: spec.forProvider.addressPrefix
+    - type: FromCompositeFieldPath
+      fromFieldPath: spec.resourceGroupName
+      toFieldPath: spec.forProvider.resourceGroupName
